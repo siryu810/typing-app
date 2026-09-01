@@ -10,6 +10,7 @@ dist-ssr/
 .output/
 coverage/
 *.log
+npm-debug.log*
 .DS_Store
 .vp/
 .vite-hooks/
@@ -17,3 +18,6 @@ worker-configuration.d.ts
 .wrangler.toml.bak
 *.local
 .cache/
+.nix-direnv/
+result
+result-*
