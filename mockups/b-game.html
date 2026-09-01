@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>案B — ポップITスタートアップ型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff7f4;
+      --ink: #1e1145;
+      --muted: #6b6385;
+      --line: #f0e4ef;
+      --coral: #f43f5e;
+      --violet: #7c3aed;
+      --lime: #65a30d;
+      --ok: #15803d;
+      --bad: #e11d48;
+      --bad-bg: #fff1f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Plus Jakarta Sans", "Noto Sans JP", sans-serif;
+      background:
+        radial-gradient(900px 400px at 0% 0%, rgba(244, 63, 94, 0.08), transparent 55%),
+        radial-gradient(700px 360px at 100% 10%, rgba(124, 58, 237, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .mock-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.9); font-size: 12px; color: var(--muted);
+    }
+    .mock-bar a { color: var(--muted); text-decoration: none; }
+    .mock-bar a:hover { color: var(--violet); }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .tabs button {
+      border: 1px solid var(--line); background: #fff; color: var(--muted);
+      font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+    }
+    .tabs button.active { background: var(--violet); color: #fff; border-color: var(--violet); }
+    .screen { display: none; min-height: calc(100vh - 42px); }
+    .screen.active { display: block; }
+
+    .hero { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
+    .pill {
+      display: inline-block; background: #fff; border: 1px solid var(--line);
+      color: var(--coral); font-size: 12px; font-weight: 700; padding: 4px 10px;
+      border-radius: 999px; margin-bottom: 14px;
+    }
+    h1 { font-size: clamp(34px, 5vw, 50px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; }
+    h1 em { font-style: normal; color: var(--violet); }
+    .sub { color: var(--muted); margin: 14px 0 28px; max-width: 480px; line-height: 1.7; }
+    .btn {
+      font: inherit; font-weight: 700; cursor: pointer; border: 0; border-radius: 999px; padding: 12px 22px;
+    }
+    .btn-coral { background: var(--coral); color: #fff; }
+    .btn-violet { background: var(--violet); color: #fff; }
+    .btn-white { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+    .soon { margin-top: 24px; color: #a78bfa; font-size: 13px; font-weight: 600; }
+
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+    .diff-card {
+      background: #fff; border: 0; border-radius: 20px; padding: 22px; text-align: left;
+      cursor: pointer; font: inherit; color: inherit; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 12px; }
+    .diff-card small { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .diff-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .diff-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .app { max-width: 880px; margin: 0 auto; padding: 20px 20px 32px; }
+    .top-chip {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      background: #fff; border-radius: 18px; padding: 12px 16px; margin-bottom: 14px;
+    }
+    .brand { font-weight: 800; }
+    .brand span { color: var(--violet); }
+    .hud { display: flex; gap: 8px; flex-wrap: wrap; }
+    .hud i {
+      font-style: normal; background: #f5f3ff; color: var(--violet); font-size: 12px; font-weight: 700;
+      padding: 6px 10px; border-radius: 999px;
+    }
+    .hud i.pay { background: #fff1f2; color: var(--coral); }
+    .hud i.time { background: #f7fee7; color: var(--lime); }
+    .hud i.combo { background: #fdf4ff; color: #c026d3; }
+
+    .chat {
+      background: #fff; border-radius: 24px; padding: 22px 20px 8px; min-height: 340px;
+    }
+    .msg { display: flex; gap: 10px; margin-bottom: 16px; max-width: 92%; }
+    .msg.me { margin-left: auto; flex-direction: row-reverse; }
+    .av {
+      width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+      color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+    .bubble { background: #faf5ff; border-radius: 16px 16px 16px 4px; padding: 10px 12px; }
+    .msg.me .bubble { background: #fff1f2; border-radius: 16px 16px 4px 16px; }
+    .msg.current .bubble { outline: 2px solid var(--violet); }
+    .meta { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+    .chip {
+      display: inline-block; font-size: 10px; font-weight: 800; background: #dcfce7; color: var(--lime);
+      border-radius: 999px; padding: 2px 8px; margin-left: 6px;
+    }
+
+    .compose { background: #fff; border-radius: 24px; padding: 16px 18px; margin-top: 12px; }
+    .jp { font-size: 17px; font-weight: 600; line-height: 1.75; margin: 6px 0 10px; }
+    .roma { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 15px; line-height: 1.9; white-space: pre-wrap; }
+    .ch-ok { color: var(--ok); }
+    .ch-bad { color: var(--bad); background: var(--bad-bg); border-radius: 3px; }
+    .ch-cur { background: var(--violet); color: #fff; border-radius: 3px; }
+    .ch-pending { color: #c4b5fd; }
+    .compose-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12px; color: var(--muted); }
+    .send { background: var(--coral); color: #fff; border: 0; border-radius: 999px; padding: 7px 14px; font: inherit; font-weight: 700; font-size: 12px; opacity: 0.4; }
+
+    .result { max-width: 600px; margin: 0 auto; padding: 64px 24px; text-align: left; }
+    .salary { font-size: clamp(42px, 7vw, 60px); font-weight: 800; letter-spacing: -0.05em; color: var(--coral); margin: 8px 0 24px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .stat { background: #fff; border-radius: 16px; padding: 14px 16px; }
+    .stat small { display: block; color: var(--muted); font-size: 12px; }
+    .stat b { font-size: 22px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 760px) {
+      .diff-grid { grid-template-columns: 1fr; }
+      .mock-bar > span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mock-bar">
+    <a href="index.html">← 比較一覧</a>
+    <div class="tabs">
+      <button data-screen="home" class="active">ホーム</button>
+      <button data-screen="difficulty">難易度</button>
+      <button data-screen="typing">タイピング</button>
+      <button data-screen="result">結果</button>
+    </div>
+    <span>案B · ポップITスタートアップ型</span>
+  </div>
+
+  <section class="screen home active" id="home">
+    <div class="hero">
+      <div class="pill">Kite Inc. · 今日のバイブス</div>
+      <h1>Reply Day<br><em>今日も返信します</em></h1>
+      <p class="sub">スタートアップの開発チャットは止まらない。依頼にサクッと返して、年収を伸ばそう。</p>
+      <button class="btn btn-coral" data-go="difficulty">出勤する</button>
+      <div class="soon">タイピング分析 · もうすぐ公開</div>
+    </div>
+  </section>
+
+  <section class="screen difficulty" id="difficulty">
+    <div class="hero">
+      <div class="pill">ロール選択</div>
+      <h1>どの自分で働く？</h1>
+      <p class="sub">全部90秒。返信が上手いほど、カイトでの年収が跳ねます。</p>
+      <div class="diff-grid">
+        <button class="diff-card" data-go="typing">
+          <div class="dot" style="background:#f43f5e"></div>
+          <small>初級 · 基本給 300万</small>
+          <h3>新米</h3>
+          <p>短い返信で場数を踏む。まずは「確認します」から。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <div class="dot" style="background:#7c3aed"></div>
+          <small>中級 · 基本給 450万</small>
+          <h3>慣れてきた</h3>
+          <p>@メンションと PR #番号。LGTM を打てる人。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <div class="dot" style="background:#65a30d"></div>
+          <small>上級 · 基本給 600万</small>
+          <h3>つよつよ</h3>
+          <p>複数行と Markdown。障害対応も任せられる。</p>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen typing" id="typing">
+    <div class="app">
+      <div class="top-chip">
+        <div class="brand">kite <span>#dev-team</span></div>
+        <div class="hud">
+          <i class="pay">年収 528万</i>
+          <i>WPM 58</i>
+          <i>94%</i>
+          <i>ミス 6</i>
+          <i class="combo">COMBO 24</i>
+          <i class="time">0:41</i>
+          <i>送信 3件</i>
+        </div>
+      </div>
+      <div class="chat">
+        <div class="msg">
+          <div class="av" style="background:#fb7185">鈴</div>
+          <div class="bubble">
+            <div class="meta">鈴木 · 09:41</div>
+            <div>本番のエラー、再現しました。ログ見てもらえますか？</div>
+          </div>
+        </div>
+        <div class="msg me">
+          <div class="av" style="background:#7c3aed">己</div>
+          <div class="bubble">
+            <div class="meta">あなた · 09:42 <span class="chip">送信済み</span></div>
+            <div>確認します。少々お待ちください。</div>
+          </div>
+        </div>
+        <div class="msg current">
+          <div class="av" style="background:#f43f5e">田</div>
+          <div class="bubble">
+            <div class="meta">田中 · 09:44 · 新着</div>
+            <div>@kaito PR #128 のレビューお願いできますか？</div>
+          </div>
+        </div>
+      </div>
+      <div class="compose">
+        <div class="meta">これから送る返信</div>
+        <div class="jp">@tanaka 見ました。LGTMです。#128 はマージして大丈夫です。</div>
+        <div class="roma" id="roma-b"></div>
+        <div class="compose-foot">
+          <span>打ち切るとポンと送信</span>
+          <button class="send" type="button" disabled>送信する</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen result" id="result">
+    <div class="result">
+      <div class="pill">おつかれさま</div>
+      <div style="font-weight:800">本日の年収</div>
+      <div class="salary">528万円</div>
+      <div class="stats">
+        <div class="stat"><small>入力速度</small><b>58 WPM</b></div>
+        <div class="stat"><small>正確率</small><b>94%</b></div>
+        <div class="stat"><small>ミス数</small><b>6</b></div>
+        <div class="stat"><small>最大連続入力</small><b>24</b></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-violet" data-go="difficulty">もう一度働く</button>
+        <button class="btn btn-white" data-go="home">ホーム</button>
+      </div>
+      <div class="soon">タイピング分析 · もうすぐ公開</div>
+    </div>
+  </section>
+
+  <script>
+    const ROMA = "@tanaka mimashita. LGTMdesu. #128 ha maaji shite daijoubudesu.";
+    const CORRECT = 32;
+    const WRONG = 4;
+    const SCREENS = ["home", "difficulty", "typing", "result"];
+    function renderRoma(el) {
+      const cur = CORRECT + WRONG;
+      el.innerHTML = [...ROMA].map((ch, i) => {
+        let cls = "ch-pending";
+        if (i < CORRECT) cls = "ch-ok";
+        else if (i < cur) cls = "ch-bad";
+        else if (i === cur) cls = "ch-cur";
+        return `<span class="${cls}">${ch}</span>`;
+      }).join("");
+    }
+    renderRoma(document.getElementById("roma-b"));
+    function currentId() {
+      const id = location.hash.replace("#", "");
+      return SCREENS.includes(id) ? id : "home";
+    }
+    function show(id) {
+      if (!SCREENS.includes(id)) id = "home";
+      document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
+      document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("active", b.dataset.screen === id));
+    }
+    function go(id) {
+      if (location.hash.replace("#", "") === id) { show(id); return; }
+      location.hash = id;
+    }
+    window.addEventListener("hashchange", () => show(currentId()));
+    document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => go(b.dataset.screen)));
+    document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+    if (!location.hash) history.replaceState(null, "", "#home");
+    show(currentId());
+  </script>
+</body>
+</html>

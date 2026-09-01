@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reply Day — UIモックアップ比較</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --ink: #1c1917;
+      --muted: #78716c;
+      --line: #e4ddd0;
+      --card: #fffcf7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .page { max-width: 1080px; margin: 0 auto; padding: 56px 32px 80px; }
+    .kicker {
+      font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted); font-weight: 600; margin-bottom: 12px;
+    }
+    h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.03em; margin-bottom: 12px; }
+    .lede { color: var(--muted); max-width: 640px; font-size: 16px; margin-bottom: 40px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    a.card {
+      display: flex; flex-direction: column; background: var(--card);
+      border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+      text-decoration: none; color: inherit; min-height: 360px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    a.card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(28, 25, 23, 0.08); }
+    .preview {
+      height: 128px; border-radius: 10px; margin-bottom: 18px; overflow: hidden; position: relative;
+    }
+    .preview-a {
+      background: #f6f7f8; border: 1px solid #e5e7eb; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px; justify-content: center;
+    }
+    .preview-a .bubble {
+      align-self: flex-start; background: #fff; border: 1px solid #e5e7eb;
+      border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #334155;
+    }
+    .preview-a .mine {
+      align-self: flex-end; background: #ecfdf8; border-color: #d1fae5; color: #115e59;
+    }
+    .preview-b {
+      background: linear-gradient(135deg, #fff1f2, #f5f3ff);
+      display: flex; align-items: center; justify-content: space-around; padding: 12px;
+    }
+    .preview-b .av {
+      width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+      color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .preview-c {
+      background: #eef1f6; display: flex; height: 100%;
+    }
+    .preview-c .rail {
+      width: 42%; background: #16181d; color: #e2e8f0; padding: 14px 12px; font-size: 10px;
+    }
+    .preview-c strong { display: block; font-size: 16px; color: #fbbf24; margin-top: 4px; }
+    .preview-c .pane { flex: 1; background: #fff; padding: 16px 12px; font-size: 11px; color: #475569; }
+    .badge { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    h2 { font-size: 20px; letter-spacing: -0.02em; margin-bottom: 8px; }
+    p.desc { color: var(--muted); font-size: 14px; flex: 1; }
+    .cta { margin-top: 18px; font-size: 14px; font-weight: 600; }
+    .card-a .cta { color: #0f766e; }
+    .card-b .cta { color: #7c3aed; }
+    .card-c .cta { color: #c27803; }
+    .note { margin-top: 36px; font-size: 13px; color: var(--muted); }
+    .ref {
+      margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line);
+      font-size: 13px; color: var(--muted);
+    }
+    .ref a { color: var(--muted); }
+    .ref a:hover { color: var(--ink); }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      .page { padding: 36px 20px 64px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="kicker">Reply Day · UI / UX Mockups</div>
+    <h1>業務チャット型タイピングの3案</h1>
+    <p class="lede">株式会社カイトの開発チャットに返信するゲームです。同じダミーデータ（年収528万・WPM 58・正確率94%）で、ホーム／難易度／タイピング／結果を3方向で比較できます。</p>
+    <div class="grid">
+      <a class="card card-a" href="a-simple.html">
+        <div class="preview preview-a">
+          <div class="bubble">@kaito PR #128 のレビューお願いできますか？</div>
+          <div class="bubble mine">@tanaka 見ました。LGTMです。</div>
+        </div>
+        <div class="badge">案 A</div>
+        <h2>ミニマル業務チャット型</h2>
+        <p class="desc">白〜薄いグレー。実務ツールに近い静かなUI。アクセントは1色、COMBOは小さく。チャットとローマ字への集中を最優先します。</p>
+        <div class="cta">モックアップを開く →</div>
+      </a>
+      <a class="card card-b" href="b-game.html">
+        <div class="preview preview-b">
+          <div class="av" style="background:#f43f5e">田</div>
+          <div class="av" style="background:#7c3aed">鈴</div>
+          <div class="av" style="background:#16a34a">己</div>
+        </div>
+        <div class="badge">案 B</div>
+        <h2>ポップITスタートアップ型</h2>
+        <p class="desc">白ベースに紫・ピンク・緑。丸い色付きアバターと角丸カード。今どきのスタートアップらしく、返信する楽しさも残します。</p>
+        <div class="cta">モックアップを開く →</div>
+      </a>
+      <a class="card card-c" href="c-modern.html">
+        <div class="preview preview-c">
+          <div class="rail">現在年収<strong>528万</strong>COMBO 24</div>
+          <div class="pane">左に成長、右にカイトチャット。下部でローマ字入力。</div>
+        </div>
+        <div class="badge">案 C</div>
+        <h2>ゲーム × 業務チャット型</h2>
+        <p class="desc">左に年収・COMBO・成長、右にチャット、下に入力。アーケード化せず、仕事をしている感覚を残しつつ指標を少し強調します。</p>
+        <div class="cta">モックアップを開く →</div>
+      </a>
+    </div>
+    <p class="note">各モックの上部バーから ホーム / 難易度 / タイピング / 結果 を切り替えられます（ハッシュで直リンク可）。判定はダミーです。仕様は docs/mvp-spec.md を参照。</p>
+    <p class="ref">参考: 前回の中間案 <a href="final.html">最終候補（案C構成 × 案Bのポップさ）</a> はディスクに残しています。今回の比較対象ではありません。</p>
+  </div>
+</body>
+</html>

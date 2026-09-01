@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>案C — ゲーム × 業務チャット型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --rail: #16181d;
+      --rail-ink: #e8eaef;
+      --dim: #8b93a7;
+      --bg: #eef1f6;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --gold: #c27803;
+      --ok: #0f766e;
+      --bad: #b91c1c;
+      --bad-bg: #fef2f2;
+      --combo: #7c3aed;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .mock-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--line);
+      background: #fff; font-size: 12px; color: var(--muted);
+    }
+    .mock-bar a { color: var(--muted); text-decoration: none; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .tabs button {
+      border: 1px solid var(--line); background: transparent; color: var(--muted);
+      font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 8px; cursor: pointer;
+    }
+    .tabs button.active { background: var(--rail); color: #fff; border-color: var(--rail); }
+    .screen { display: none; min-height: calc(100vh - 42px); }
+    .screen.active { display: block; }
+    .screen.typing.active { display: flex; }
+
+    .pad { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
+    .kicker { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 10px; }
+    h1 { font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.03em; margin-bottom: 12px; }
+    .sub { color: var(--muted); max-width: 480px; line-height: 1.7; margin-bottom: 28px; }
+    .btn { font: inherit; font-weight: 600; cursor: pointer; border-radius: 10px; padding: 11px 18px; }
+    .btn-dark { background: var(--rail); color: #fff; border: 0; }
+    .btn-line { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+    .soon { margin-top: 24px; font-size: 13px; color: #94a3b8; }
+
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .diff-card {
+      background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+      text-align: left; cursor: pointer; font: inherit; color: inherit;
+    }
+    .diff-card:hover { border-color: var(--gold); }
+    .diff-card small { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
+    .diff-card h3 { margin: 8px 0; font-size: 18px; }
+    .diff-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .rail {
+      width: 260px; flex-shrink: 0; background: var(--rail); color: var(--rail-ink);
+      padding: 24px 20px; display: flex; flex-direction: column; gap: 22px;
+    }
+    .rail .ws { font-size: 12px; color: var(--dim); }
+    .rail h2 { font-size: 16px; font-weight: 600; }
+    .pay-label { font-size: 11px; color: var(--dim); letter-spacing: 0.08em; }
+    .pay { font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: #fbbf24; line-height: 1.2; }
+    .combo-box {
+      background: #1f222a; border-radius: 12px; padding: 12px 14px;
+    }
+    .combo-box span { font-size: 11px; color: var(--dim); }
+    .combo-box strong { display: block; font-size: 28px; color: #c4b5fd; }
+    .grow-label { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
+    .bar { height: 8px; background: #2a2e38; border-radius: 99px; overflow: hidden; }
+    .bar i { display: block; width: 62%; height: 100%; background: #fbbf24; }
+    .grow-meta { font-size: 12px; color: var(--dim); margin-top: 6px; }
+    .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: var(--dim); }
+    .mini b { display: block; color: #fff; font-size: 16px; }
+
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .main-head {
+      background: #fff; border-bottom: 1px solid var(--line);
+      padding: 12px 22px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .thread { flex: 1; padding: 24px 28px 8px; display: flex; flex-direction: column; gap: 16px; }
+    .msg { display: flex; gap: 10px; max-width: 640px; }
+    .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+    .av {
+      width: 32px; height: 32px; border-radius: 8px; background: #94a3b8; color: #fff;
+      display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .av.me { background: #334155; }
+    .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .msg.me .bubble { background: #f8fafc; }
+    .msg.current .bubble { border-color: #c27803; }
+    .meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .compose-wrap { padding: 0 28px 24px; }
+    .compose { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+    .jp { font-size: 15px; line-height: 1.7; margin: 6px 0 8px; }
+    .roma { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; line-height: 1.85; white-space: pre-wrap; }
+    .ch-ok { color: var(--ok); }
+    .ch-bad { color: var(--bad); background: var(--bad-bg); }
+    .ch-cur { background: var(--gold); color: #fff; }
+    .ch-pending { color: #94a3b8; }
+    .compose-foot { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--muted); }
+    .send { background: var(--rail); color: #fff; border: 0; border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 12px; opacity: 0.4; }
+
+    .salary { font-size: clamp(40px, 6vw, 56px); font-weight: 700; letter-spacing: -0.04em; color: var(--gold); margin: 6px 0 24px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
+    .stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .stat small { display: block; color: var(--muted); font-size: 12px; }
+    .stat b { font-size: 20px; }
+    .actions { display: flex; gap: 10px; }
+
+    @media (max-width: 860px) {
+      .screen.typing.active { flex-direction: column; }
+      .rail { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+      .pay { font-size: 24px; }
+      .diff-grid, .stats { grid-template-columns: 1fr 1fr; }
+      .mock-bar > span { display: none; }
+    }
+    @media (max-width: 560px) {
+      .diff-grid, .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mock-bar">
+    <a href="index.html">← 比較一覧</a>
+    <div class="tabs">
+      <button data-screen="home" class="active">ホーム</button>
+      <button data-screen="difficulty">難易度</button>
+      <button data-screen="typing">タイピング</button>
+      <button data-screen="result">結果</button>
+    </div>
+    <span>案C · ゲーム × 業務チャット型</span>
+  </div>
+
+  <section class="screen home active" id="home">
+    <div class="pad">
+      <div class="kicker">株式会社カイト · 報酬連動</div>
+      <h1>Reply Day</h1>
+      <p class="sub">チャットに返すたびに年収が動く。コンボを繋いで、新米からつよつよへ。</p>
+      <button class="btn btn-dark" data-go="difficulty">業務を開始する</button>
+      <div class="soon">タイピング分析 · 準備中</div>
+    </div>
+  </section>
+
+  <section class="screen difficulty" id="difficulty">
+    <div class="pad">
+      <div class="kicker">キャリア選択</div>
+      <h1>どの年収帯で働く</h1>
+      <p class="sub">基本給が違います。制限時間は90秒。難しい返信ほど報酬が大きい。</p>
+      <div class="diff-grid">
+        <button class="diff-card" data-go="typing">
+          <small>基本給 300万</small>
+          <h3>新米</h3>
+          <p>短い返信で基礎を固める。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <small>基本給 450万</small>
+          <h3>慣れてきた</h3>
+          <p>@とPR番号が日常になる。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <small>基本給 600万</small>
+          <h3>つよつよ</h3>
+          <p>障害対応の長文を任される。</p>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen typing" id="typing">
+    <aside class="rail">
+      <div>
+        <div class="ws">KITE WORKSPACE</div>
+        <h2>#dev-team</h2>
+      </div>
+      <div>
+        <div class="pay-label">現在年収</div>
+        <div class="pay">528万</div>
+      </div>
+      <div class="combo-box">
+        <span>COMBO</span>
+        <strong>24</strong>
+      </div>
+      <div>
+        <div class="grow-label">今日の成長</div>
+        <div class="bar"><i></i></div>
+        <div class="grow-meta">慣れてきた 62%</div>
+      </div>
+      <div class="mini">
+        <div>WPM<b>58</b></div>
+        <div>正確率<b>94%</b></div>
+        <div>ミス<b>6</b></div>
+        <div>残り<b>0:41</b></div>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="main-head">
+        <strong>開発チーム</strong>
+        <span style="font-size:12px;color:var(--muted)">送信済み 3件</span>
+      </div>
+      <div class="thread">
+        <div class="msg">
+          <div class="av">鈴</div>
+          <div class="bubble">
+            <div class="meta">鈴木 · 09:41</div>
+            <div>本番のエラー、再現しました。ログ見てもらえますか？</div>
+          </div>
+        </div>
+        <div class="msg me">
+          <div class="av me">己</div>
+          <div class="bubble">
+            <div class="meta">あなた · 09:42 · 送信済み</div>
+            <div>確認します。少々お待ちください。</div>
+          </div>
+        </div>
+        <div class="msg current">
+          <div class="av" style="background:#c27803">田</div>
+          <div class="bubble">
+            <div class="meta">田中 · 09:44 · 新着</div>
+            <div>@kaito PR #128 のレビューお願いできますか？</div>
+          </div>
+        </div>
+      </div>
+      <div class="compose-wrap">
+        <div class="compose">
+          <div class="meta">これから送る返信</div>
+          <div class="jp">@tanaka 見ました。LGTMです。#128 はマージして大丈夫です。</div>
+          <div class="roma" id="roma-c"></div>
+          <div class="compose-foot">
+            <span>打ち切ると自動送信</span>
+            <button class="send" type="button" disabled>送信</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen result" id="result">
+    <div class="pad">
+      <div class="kicker">退勤レポート</div>
+      <div style="color:var(--muted)">本日の年収</div>
+      <div class="salary">528万円</div>
+      <div class="stats">
+        <div class="stat"><small>入力速度</small><b>58 WPM</b></div>
+        <div class="stat"><small>正確率</small><b>94%</b></div>
+        <div class="stat"><small>ミス数</small><b>6</b></div>
+        <div class="stat"><small>最大連続</small><b>24</b></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-dark" data-go="difficulty">もう一度</button>
+        <button class="btn btn-line" data-go="home">ホーム</button>
+      </div>
+      <div class="soon">タイピング分析 · 準備中</div>
+    </div>
+  </section>
+
+  <script>
+    const ROMA = "@tanaka mimashita. LGTMdesu. #128 ha maaji shite daijoubudesu.";
+    const CORRECT = 32;
+    const WRONG = 4;
+    const SCREENS = ["home", "difficulty", "typing", "result"];
+    function renderRoma(el) {
+      const cur = CORRECT + WRONG;
+      el.innerHTML = [...ROMA].map((ch, i) => {
+        let cls = "ch-pending";
+        if (i < CORRECT) cls = "ch-ok";
+        else if (i < cur) cls = "ch-bad";
+        else if (i === cur) cls = "ch-cur";
+        return `<span class="${cls}">${ch}</span>`;
+      }).join("");
+    }
+    renderRoma(document.getElementById("roma-c"));
+    function currentId() {
+      const id = location.hash.replace("#", "");
+      return SCREENS.includes(id) ? id : "home";
+    }
+    function show(id) {
+      if (!SCREENS.includes(id)) id = "home";
+      document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
+      document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("active", b.dataset.screen === id));
+    }
+    function go(id) {
+      if (location.hash.replace("#", "") === id) { show(id); return; }
+      location.hash = id;
+    }
+    window.addEventListener("hashchange", () => show(currentId()));
+    document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => go(b.dataset.screen)));
+    document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+    if (!location.hash) history.replaceState(null, "", "#home");
+    show(currentId());
+  </script>
+</body>
+</html>

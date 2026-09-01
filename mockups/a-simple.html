@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>案A — ミニマル業務チャット型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --panel: #ffffff;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f766e;
+      --ok: #0f766e;
+      --bad: #b91c1c;
+      --bad-bg: #fef2f2;
+      --you: #ecfdf5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "IBM Plex Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .mock-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--line);
+      background: #fff; font-size: 12px; color: var(--muted);
+    }
+    .mock-bar a { color: var(--muted); text-decoration: none; }
+    .mock-bar a:hover { color: var(--accent); }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .tabs button {
+      border: 1px solid var(--line); background: transparent; color: var(--muted);
+      font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+    }
+    .tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .screen { display: none; min-height: calc(100vh - 42px); }
+    .screen.active { display: block; }
+
+    .center-wrap { max-width: 720px; margin: 0 auto; padding: 72px 24px; }
+    .eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 10px; }
+    h1 { font-size: clamp(32px, 4vw, 44px); font-weight: 600; letter-spacing: -0.03em; margin-bottom: 12px; }
+    .sub { color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 460px; }
+    .btn {
+      font: inherit; cursor: pointer; border-radius: 6px; font-size: 14px; font-weight: 500;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border: 0; padding: 11px 22px; }
+    .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); padding: 10px 18px; }
+    .soon { margin-top: 28px; font-size: 13px; color: #94a3b8; }
+
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+    .diff-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+      padding: 22px; text-align: left; cursor: pointer; font: inherit; color: inherit;
+    }
+    .diff-card:hover { border-color: var(--accent); }
+    .diff-card small { color: var(--muted); font-size: 12px; }
+    .diff-card h3 { font-size: 18px; font-weight: 600; margin: 6px 0 10px; }
+    .diff-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .workspace { display: flex; flex-direction: column; min-height: calc(100vh - 42px); }
+    .channel-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+      padding: 10px 24px; background: #fff; border-bottom: 1px solid var(--line);
+    }
+    .channel-bar h2 { font-size: 15px; font-weight: 600; }
+    .channel-bar h2 span { color: var(--muted); font-weight: 400; }
+    .hud { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+    .hud b { color: var(--ink); font-weight: 600; }
+    .hud .combo-tiny { font-size: 11px; color: #94a3b8; }
+    .hud .combo-tiny b { font-weight: 500; color: #94a3b8; }
+
+    .thread {
+      flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 28px 24px 12px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .msg { display: flex; gap: 12px; max-width: 640px; }
+    .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 6px; background: #cbd5e1; color: #fff;
+      display: grid; place-items: center; font-size: 12px; font-weight: 600; flex-shrink: 0;
+    }
+    .avatar.tanaka { background: #64748b; }
+    .avatar.suzuki { background: #94a3b8; }
+    .avatar.me { background: var(--accent); }
+    .bubble { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+    .msg.me .bubble { background: var(--you); border-color: #d1fae5; }
+    .msg.current .bubble { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.08); }
+    .meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .bubble p { font-size: 14px; line-height: 1.65; }
+
+    .compose {
+      max-width: 860px; width: 100%; margin: 0 auto 24px; padding: 0 24px;
+    }
+    .compose-box {
+      background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+    }
+    .compose-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .jp { font-size: 16px; line-height: 1.7; margin-bottom: 10px; }
+    .roma {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 14px; line-height: 1.8; white-space: pre-wrap;
+    }
+    .ch-ok { color: var(--ok); }
+    .ch-bad { color: var(--bad); background: var(--bad-bg); border-radius: 2px; }
+    .ch-cur { background: var(--ink); color: #fff; border-radius: 2px; }
+    .ch-pending { color: #94a3b8; }
+    .compose-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 10px; font-size: 12px; color: var(--muted);
+    }
+    .send { background: var(--accent); color: #fff; border: 0; padding: 6px 14px; border-radius: 6px; font: inherit; font-size: 12px; opacity: 0.45; }
+
+    .result-wrap { max-width: 560px; margin: 0 auto; padding: 72px 24px; }
+    .salary { font-size: clamp(40px, 6vw, 56px); font-weight: 600; letter-spacing: -0.04em; margin: 8px 0 28px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-bottom: 32px; }
+    .stats small { display: block; color: var(--muted); font-size: 12px; }
+    .stats b { font-size: 22px; font-weight: 600; }
+    .actions { display: flex; gap: 10px; }
+
+    @media (max-width: 760px) {
+      .diff-grid { grid-template-columns: 1fr; }
+      .hud { width: 100%; justify-content: space-between; }
+      .mock-bar > span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mock-bar">
+    <a href="index.html">← 比較一覧</a>
+    <div class="tabs">
+      <button data-screen="home" class="active">ホーム</button>
+      <button data-screen="difficulty">難易度</button>
+      <button data-screen="typing">タイピング</button>
+      <button data-screen="result">結果</button>
+    </div>
+    <span>案A · ミニマル業務チャット型</span>
+  </div>
+
+  <section class="screen home active" id="home">
+    <div class="center-wrap">
+      <div class="eyebrow">株式会社カイト · 開発チーム</div>
+      <h1>Reply Day</h1>
+      <p class="sub">今日も返信します。社内チャットに届いた依頼を、正確に、早く返す。それがあなたの年収になります。</p>
+      <button class="btn btn-primary" data-go="difficulty">業務を開始する</button>
+      <div class="soon">タイピング分析 · 準備中</div>
+    </div>
+  </section>
+
+  <section class="screen difficulty" id="difficulty">
+    <div class="center-wrap">
+      <div class="eyebrow">今日の役割</div>
+      <h1>難易度を選ぶ</h1>
+      <p class="sub">制限時間はいずれも90秒。返信の長さと業務の複雑さが変わります。</p>
+      <div class="diff-grid">
+        <button class="diff-card" data-go="typing">
+          <small>初級 · 基本給 300万</small>
+          <h3>新米</h3>
+          <p>短い返信。簡単な日本語。記号は少なめ。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <small>中級 · 基本給 450万</small>
+          <h3>慣れてきた</h3>
+          <p>@メンション、PR番号、軽いMarkdown。</p>
+        </button>
+        <button class="diff-card" data-go="typing">
+          <small>上級 · 基本給 600万</small>
+          <h3>つよつよ</h3>
+          <p>複数行、技術用語、記号を含むやり取り。</p>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen typing" id="typing">
+    <div class="workspace">
+      <div class="channel-bar">
+        <h2>#dev-team <span>カイト開発 · 送信済み 3件</span></h2>
+        <div class="hud">
+          <div>年収 <b>528万</b></div>
+          <div>WPM <b>58</b></div>
+          <div>正確率 <b>94%</b></div>
+          <div>ミス <b>6</b></div>
+          <div>残り <b>0:41</b></div>
+          <div class="combo-tiny">COMBO <b>24</b></div>
+        </div>
+      </div>
+      <div class="thread">
+        <div class="msg">
+          <div class="avatar suzuki">鈴</div>
+          <div class="bubble">
+            <div class="meta">鈴木 · 09:41</div>
+            <p>本番のエラー、再現しました。ログ見てもらえますか？</p>
+          </div>
+        </div>
+        <div class="msg me">
+          <div class="avatar me">己</div>
+          <div class="bubble">
+            <div class="meta">あなた · 09:42 · 送信済み</div>
+            <p>確認します。少々お待ちください。</p>
+          </div>
+        </div>
+        <div class="msg current">
+          <div class="avatar tanaka">田</div>
+          <div class="bubble">
+            <div class="meta">田中 · 09:44 · 新着</div>
+            <p>@kaito PR #128 のレビューお願いできますか？</p>
+          </div>
+        </div>
+      </div>
+      <div class="compose">
+        <div class="compose-box">
+          <div class="compose-label">これから送る返信</div>
+          <div class="jp">@tanaka 見ました。LGTMです。#128 はマージして大丈夫です。</div>
+          <div class="roma" id="roma-a"></div>
+          <div class="compose-foot">
+            <span>打ち切ると自動送信</span>
+            <button class="send" type="button" disabled>送信</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen result" id="result">
+    <div class="result-wrap">
+      <div class="eyebrow">退勤</div>
+      <div style="color:var(--muted);font-size:14px;">本日の年収</div>
+      <div class="salary">528万円</div>
+      <div class="stats">
+        <div><small>入力速度</small><b>58 WPM</b></div>
+        <div><small>正確率</small><b>94%</b></div>
+        <div><small>ミス数</small><b>6</b></div>
+        <div><small>最大連続入力</small><b>24</b></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" data-go="difficulty">もう一度</button>
+        <button class="btn btn-ghost" data-go="home">ホーム</button>
+      </div>
+      <div class="soon">タイピング分析 · 準備中</div>
+    </div>
+  </section>
+
+  <script>
+    const ROMA = "@tanaka mimashita. LGTMdesu. #128 ha maaji shite daijoubudesu.";
+    const CORRECT = 32;
+    const WRONG = 4;
+    const SCREENS = ["home", "difficulty", "typing", "result"];
+    function renderRoma(el) {
+      const cur = CORRECT + WRONG;
+      el.innerHTML = [...ROMA].map((ch, i) => {
+        let cls = "ch-pending";
+        if (i < CORRECT) cls = "ch-ok";
+        else if (i < cur) cls = "ch-bad";
+        else if (i === cur) cls = "ch-cur";
+        return `<span class="${cls}">${ch}</span>`;
+      }).join("");
+    }
+    renderRoma(document.getElementById("roma-a"));
+    function currentId() {
+      const id = location.hash.replace("#", "");
+      return SCREENS.includes(id) ? id : "home";
+    }
+    function show(id) {
+      if (!SCREENS.includes(id)) id = "home";
+      document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
+      document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("active", b.dataset.screen === id));
+    }
+    function go(id) {
+      if (location.hash.replace("#", "") === id) { show(id); return; }
+      location.hash = id;
+    }
+    window.addEventListener("hashchange", () => show(currentId()));
+    document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => go(b.dataset.screen)));
+    document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+    if (!location.hash) history.replaceState(null, "", "#home");
+    show(currentId());
+  </script>
+</body>
+</html>
