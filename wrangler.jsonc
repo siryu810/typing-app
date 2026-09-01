@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "reply-day",
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_id": "a9e9d3cc-9a0c-427f-8fe0-d57e3ebaf8c7",
       "migrations_dir": "migrations",
     },
   ],
